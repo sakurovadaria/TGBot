@@ -1,0 +1,49 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1-create-notification-task
+      author: you
+      changes:
+        - createTable:
+            tableName: notification_task
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: chat_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: text
+                  type: VARCHAR(1000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: notify_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: sent
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+
+        # индекс для ускорения выборки по notify_at/sent
+        - createIndex:
+            tableName: notification_task
+            indexName: idx_notification_due
+            columns:
+              - column:
+                  name: notify_at
+              - column:
+                  name: sent
