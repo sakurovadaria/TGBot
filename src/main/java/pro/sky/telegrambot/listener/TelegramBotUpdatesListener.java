@@ -3,34 +3,44 @@ package pro.sky.telegrambot.listener;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.pengrad.telegrambot.request.SendMessage;
+import org.springframework.stereotype.Component;
+import pro.sky.telegrambot.service.NotificationService;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 
-@Service
+@Component
 public class TelegramBotUpdatesListener implements UpdatesListener {
 
-    private Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
+    private final TelegramBot bot;
+    private final NotificationService notificationService;
 
-    @Autowired
-    private TelegramBot telegramBot;
-
-    @PostConstruct
-    public void init() {
-        telegramBot.setUpdatesListener(this);
+    public TelegramBotUpdatesListener(TelegramBot bot, NotificationService notificationService) {
+        this.bot = bot;
+        this.notificationService = notificationService;
+        this.bot.setUpdatesListener(this);
     }
 
     @Override
     public int process(List<Update> updates) {
-        updates.forEach(update -> {
-            logger.info("Processing update: {}", update);
-            // Process your updates here
-        });
+        for (Update update : updates) {
+            if (update.message() == null || update.message().text() == null) continue;
+
+            Long chatId = update.message().chat().id();
+            String text = update.message().text().trim();
+
+            if (text.equals("/start")) {
+                bot.execute(new SendMessage(chatId, "Привет! Отправь напоминание в формате: 01.01.2022 20:00 Сделать домашнюю работу"));
+                continue;
+            }
+
+            boolean saved = notificationService.parseAndSaveReminder(chatId, text);
+            if (saved)
+                bot.execute(new SendMessage(chatId, "✅ Напоминание сохранено!"));
+            else
+                bot.execute(new SendMessage(chatId, "❌ Формат неверный. Используй: 01.01.2022 20:00 Текст"));
+        }
+
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
-
 }
