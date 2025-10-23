@@ -30,7 +30,11 @@ public class NotificationController {
     @PostMapping
     public ResponseEntity<String> addNotification(@RequestParam Long chatId, @RequestParam String text) {
         boolean ok = service.parseAndSaveReminder(chatId, text);
-        if (ok) return ResponseEntity.ok("Notification saved successfully");
-        else return ResponseEntity.badRequest().body("Invalid format. Use: dd.MM.yyyy HH:mm <text>");
+        if (ok) {
+            return ResponseEntity.ok("Notification saved successfully");
+        }
+        else {
+            return ResponseEntity.badRequest().body("Invalid format. Use: dd.MM.yyyy HH:mm <text>");
+        }
     }
 }

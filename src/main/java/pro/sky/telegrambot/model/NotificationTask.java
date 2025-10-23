@@ -1,5 +1,8 @@
 package pro.sky.telegrambot.model;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -23,13 +26,13 @@ public class NotificationTask {
     @Column(name = "sent", nullable = false)
     private boolean sent = false;
 
+    @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @PrePersist
-    public void prePersist() {
-        if (createdAt == null) createdAt = LocalDateTime.now();
-    }
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     // --- конструкторы, геттеры/сеттеры ---
     public NotificationTask() {}
